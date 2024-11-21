@@ -3,24 +3,39 @@ pipeline {
     parameters {
         string(name: 'NUM1', defaultValue: '5', description: 'First number')
         string(name: 'NUM2', defaultValue: '10', description: 'Second number')
-        string(name: 'operation', defaultValue: 'add', description: 'Enter operation')
+        string(name: 'operation', defaultValue: 'add', description: 'Enter operation (add, subtract, multiply, divide)')
     }
     stages {
         stage('Setup Python Environment') {
             steps {
                 script {
-                    // Optional: Verify Python installation
-                    sh 'python --version || exit 1'
+                    // Check if Python is installed and accessible
+                    sh '''
+                        python --version || (echo "Python is not installed or not in PATH" && exit 1)
+                    '''
                 }
             }
         }
         stage('Run Python Script') {
             steps {
                 script {
-                    // Pass arguments to the Python script
-                    sh "python Add.py ${params.NUM1} ${params.NUM2} ${params.operation}"
+                    // Run the Python script with arguments
+                    sh """
+                        python Add.py ${params.NUM1} ${params.NUM2} ${params.operation} || (echo "Python script execution failed" && exit 1)
+                    """
                 }
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline execution completed.'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs for details.'
+        }
+        success {
+            echo 'Pipeline succeeded.'
         }
     }
 }
