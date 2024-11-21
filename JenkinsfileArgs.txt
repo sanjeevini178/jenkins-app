@@ -11,7 +11,7 @@ pipeline {
                 script {
                     // Check if Python is installed and accessible
                     sh '''
-                        python --version || (echo "Python is not installed or not in PATH" && exit 1)
+                        python3 --version || (echo "Python is not installed or not in PATH" && exit 1)
                     '''
                 }
             }
@@ -21,7 +21,7 @@ pipeline {
                 script {
                     // Run the Python script with arguments
                     sh """
-                        python Add.py ${params.NUM1} ${params.NUM2} ${params.operation} || (echo "Python script execution failed" && exit 1)
+                        python3 Add.py ${params.NUM1} ${params.NUM2} ${params.operation} || (echo "Python script execution failed" && exit 1)
                     """
                 }
             }
