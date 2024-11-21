@@ -10,7 +10,7 @@ pipeline {
             steps {
                 script {
                     // Optional: Verify Python installation
-                    bat 'python --version || exit 1'
+                    sh 'python --version || exit 1'
                 }
             }
         }
@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     // Pass arguments to the Python script
-                    bat "python Add.py ${params.NUM1} ${params.NUM2} ${params.operation}"
+                    sh "python Add.py ${params.NUM1} ${params.NUM2} ${params.operation}"
                 }
             }
         }
