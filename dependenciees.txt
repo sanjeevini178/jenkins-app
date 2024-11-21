@@ -633,8 +633,101 @@ proxy_pass http://flaskapp;
 }
 }
 
+------------------------------------------------------------------------------------------------------------------
+To trigger a Jenkins build upon a `git push` for a repository containing a simple Python file, follow these steps:
 
+---
 
+### **1. Set Up Your Jenkins Job**
+1. **Create a New Job**:
+   - Open Jenkins.
+   - Click **New Item**.
+   - Enter a name for the job (e.g., "Python-Build").
+   - Select **Freestyle project** or **Pipeline**, depending on your preference, and click **OK**.
+
+2. **Configure Source Code Management**:
+   - Under **Source Code Management**, select **Git**.
+   - Provide the repository URL (e.g., `https://github.com/your-repo/python-scripts.git`).
+   - Add credentials if necessary (e.g., a GitHub token or username/password).
+
+3. **Specify Build Triggers**:
+   - Check **GitHub hook trigger for GITScm polling** or **Poll SCM**:
+     - For **GitHub hook trigger**, you'll set up a webhook in GitHub (explained later).
+     - For **Poll SCM**, use a polling schedule (e.g., `H/5 * * * *` to check every 5 minutes).
+
+4. **Add Build Steps**:
+   - Add a build step to run your Python file:
+     - If you're using a freestyle job:
+       - Select **Add build step > Execute shell** (or **Execute Windows batch command** on Windows).
+       - Add the command to run your Python script:
+         ```bash
+         python your_script.py
+         ```
+     - If you're using a pipeline:
+       - Write a pipeline script to clone the repo and execute the Python file:
+         ```groovy
+         pipeline {
+             agent any
+             stages {
+                 stage('Clone Repository') {
+                     steps {
+                         git 'https://github.com/your-repo/python-scripts.git'
+                     }
+                 }
+                 stage('Run Python Script') {
+                     steps {
+                         sh 'python your_script.py'
+                     }
+                 }
+             }
+         }
+         ```
+
+5. **Save the Job**.
+
+---
+
+### **2. Add a Webhook in GitHub**
+1. Go to your repository on GitHub.
+2. Navigate to **Settings > Webhooks > Add webhook**.
+3. In the **Payload URL** field, enter your Jenkins webhook URL:
+   - The format is: `http://<JENKINS_URL>/github-webhook/`.
+   - Replace `<JENKINS_URL>` with your Jenkins server's address (e.g., `http://localhost:8080/github-webhook/`).
+4. Set the **Content type** to `application/json`.
+5. Select **Let me select individual events** and check **Push events**.
+6. Click **Add webhook**.
+
+---
+
+### **3. Configure Jenkins for GitHub Integration**
+1. Install the **GitHub Integration Plugin** in Jenkins:
+   - Go to **Manage Jenkins > Plugin Manager > Available**.
+   - Search for **GitHub Integration Plugin** and install it.
+2. Under **Manage Jenkins > Configure System**:
+   - Find the **GitHub** section.
+   - Add your GitHub account credentials.
+3. Ensure your Jenkins server can receive requests from GitHub (use a public IP or tunnel like **ngrok** if running locally).
+
+---
+
+### **4. Test the Setup**
+1. Push a commit to your GitHub repository:
+   ```bash
+   git add .
+   git commit -m "Test triggering Jenkins build"
+   git push origin main
+   ```
+2. The Jenkins job should trigger automatically. Check the **Build History** in Jenkins to confirm.
+
+---
+
+### **Alternative: Use Poll SCM**
+If setting up webhooks is not feasible, you can use Jenkins' **Poll SCM** option:
+- Go to the job configuration.
+- Check **Poll SCM** under **Build Triggers**.
+- Add a cron-like schedule (e.g., `H/5 * * * *` to check every 5 minutes).
+
+While less immediate, this method works without webhooks.
 
 
 
